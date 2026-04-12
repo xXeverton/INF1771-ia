@@ -1,4 +1,12 @@
-T1/
+meu_projeto/
+│
+├── assets/              # imagens .png aqui
+│   ├── tiles/           # Imagens de grama, montanha, água, etc.
+│   └── sprites/         # Imagens dos personagens (Aang, Katara...)
+│
+├── gui/                 # Tudo relacionado ao Pygame
+│   ├── __init__.py
+│   └── renderer.py      # Classe responsável por abrir a janela e desenhar
 │
 ├── map/                 # Tudo relacionado ao ambiente
 │   ├── __init__.py

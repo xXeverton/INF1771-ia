@@ -3,6 +3,7 @@ Este é o gestor. O Agente conhece o ambiente (map.py), sabe andar (astar.py) e 
 para organizar a equipa (allocation.py). A responsabilidade dele é juntar tudo e imprimir o diário de bordo.
 """
 
+
 from map.constants import EQUIPE_CONFIG, DIFICULDADES
 from algorithms.astar import executar_a_estrela
 from algorithms.allocation import otimizar_alocacao_equipa
@@ -28,10 +29,11 @@ class AgenteAvatar:
         print("A planear a estratégia de batalhas...")
         alocacao_equipa, energia_final = otimizar_alocacao_equipa(self.dificuldades, self.equipa)
 
-        # Variáveis para acumular o tempo
+        # Variáveis para acumular o tempo e os dados para a interface gráfica
         tempo_soma_viagens = 0.0
         tempo_soma_batalhas = 0.0
         caminho_completo = []
+        log_jornada = []  # <--- NOVA LISTA PARA ALIMENTAR O PYGAME
 
         print("\n" + "="*70)
         print(" INICIANDO A GRANDE JORNADA DO AVATAR ".center(70, "="))
@@ -52,7 +54,7 @@ class AgenteAvatar:
 
             if not caminho_trecho:
                 print(f"ERRO CRÍTICO: Caminho bloqueado entre '{chave_origem}' e '{chave_destino}'.")
-                return
+                return [], [] # <--- Modificado para retornar listas vazias em caso de erro
 
             # Calcula o tempo de batalha se houver uma luta neste destino
             tempo_batalha = 0.0
@@ -71,7 +73,12 @@ class AgenteAvatar:
 
             # Formatação do Output
             equipa_str = ", ".join(equipa_luta) if equipa_luta else "—"
-            print(f"[{chave_origem}->{chave_destino}] {equipa_str:<35} {tempo_soma_viagens:>8.1f} {tempo_soma_batalhas:>8.1f} {tempo_total_jornada:>8.1f}")
+            
+            # Guardamos a formatação numa variável para poder imprimir E enviar para o Pygame
+            linha_log = f"[{chave_origem}->{chave_destino}] {equipa_str:<35} {tempo_soma_viagens:>8.1f} {tempo_soma_batalhas:>8.1f} {tempo_total_jornada:>8.1f}"
+            
+            print(linha_log)
+            log_jornada.append(linha_log) # <--- Guardar na lista do Pygame
 
             # Adiciona o caminho ao rasto geral (ignorando o último passo para não duplicar na próxima iteração)
             caminho_completo.extend(caminho_trecho[:-1])
@@ -87,6 +94,9 @@ class AgenteAvatar:
         print(f"  CUSTO GLOBAL DA JORNADA:             {tempo_total_jornada:.2f} minutos")
         print("="*70)
 
-        # Desenhar no terminal
-        print("\nA processar rasto do mapa...")
+        # Desenhar no terminal (podemos manter para ter duplo feedback visual)
+        print("\nA processar rasto do mapa no console...")
         self.mapa.exibir_mapa(caminho_completo)
+
+        # <--- RETORNO FINAL: Devolve os dados estruturados para o main.py
+        return caminho_completo, log_jornada
