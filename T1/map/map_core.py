@@ -49,18 +49,3 @@ class MapaAang:
             if 0 <= nx < largura and 0 <= ny < altura:
                 vizinhos.append((nx, ny))
         return vizinhos
-
-    def exibir_mapa(self, caminho=None):
-        matriz_visual = [linha[:] for linha in self.matriz]
-
-        if caminho:
-            for x, y in caminho:
-                matriz_visual[y][x] = '█'
-
-        for checkpoint, (x, y) in self.checkpoints.items():
-            matriz_visual[y][x] = checkpoint
-
-        print("\n=== MAPA DO AVATAR ===")
-        for linha in matriz_visual:
-            print("".join(linha))
-        print("======================\n")

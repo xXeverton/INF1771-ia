@@ -106,9 +106,5 @@ class AgenteAvatar:
         print(f"  CUSTO GLOBAL DA JORNADA:             {tempo_total_jornada:.2f} minutos")
         print("="*70)
 
-        # Desenhar no terminal o rasto (duplo feedback visual)
-        print("\nA processar rasto do mapa no console...")
-        self.mapa.exibir_mapa(caminho_completo)
-
         # Retorna o caminho para a animação e a lista de dicionários para o painel de status
         return caminho_completo, log_jornada

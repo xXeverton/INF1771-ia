@@ -56,16 +56,6 @@ AG_PARADA_ESTAGNACAO  = 80    # Para após N gerações sem melhoria
 # FUNÇÕES AUXILIARES PURAS
 # ──────────────────────────────────────────────────────────────────────────────
 
-def _tempo_etapa(dificuldade, agilidade_total):
-    """
-    Calcula o tempo gasto em uma etapa.
-    Fórmula do enunciado: Tempo = Dificuldade / Soma(Agilidade)
-    """
-    if agilidade_total > 0:
-        return dificuldade / agilidade_total
-    return float('inf')
-
-
 def _cromo_para_aloc(cromo, etapas_batalha):
     """
     Converte a representação por personagem para a representação por etapa.
@@ -430,7 +420,7 @@ def _torneio(fitnesses, k):
 # ──────────────────────────────────────────────────────────────────────────────
 
 def otimizar_alocacao_equipa(dificuldades_etapas, configuracao_equipa,
-                              verbose=False):
+                              verbose=True):
     """
     Algoritmo Genético para resolver o Problema 2 (alocação de equipe).
 
