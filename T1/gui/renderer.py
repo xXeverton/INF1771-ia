@@ -1,3 +1,5 @@
+# Este arquivo implementa a interface gráfica usando Pygame para visualizar o mapa e a jornada.
+
 """
 Visualizador Pygame - Avatar: The Last Airbender Theme
 INF1771 · Layout em Cards com Assets Reais do Jogo GBA
@@ -78,16 +80,6 @@ TERRAIN_LEGEND = [
 class AvatarPixelFont:
     """
     Recorta as letras da sprite-sheet de fonte do jogo GBA.
-
-    Layout da imagem (Miscellaneous-Font-and-Options.png):
-      - Linha 1, cols 0-8:   A B C D E F G H I     (y≈0,  h≈14)
-      - Linha 1, cols 9-17:  J K L M N O P Q R
-      - Linha 2, cols 0-8:   S T U V W X Y Z        (y≈14)
-      - Linha 3, cols 0-8:   a b c d e f g h i      (y≈28)
-      - Linha 3, cols 9-17:  j k l m n o p q r
-      - Linha 4, cols 0-7:   s t u v w x y z        (y≈42)
-
-    Os valores TILE_W / TILE_H devem ser ajustados ao tamanho real da imagem.
     """
 
     # Ajuste estes valores conforme a imagem real:
@@ -99,6 +91,10 @@ class AvatarPixelFont:
     _MAP: dict[str, tuple[int, int]] = {}
 
     def __init__(self, sheet: pygame.Surface):
+        """
+        Inicializa a fonte com a sprite-sheet.
+        :param sheet: Superfície da sprite-sheet.
+        """
         self.sheet = sheet
         self._build_map()
         self._cache: dict[tuple, pygame.Surface] = {}
@@ -115,7 +111,12 @@ class AvatarPixelFont:
             self._MAP[ch] = (i % self.COLS, row_offset + i // self.COLS)
 
     def get_char(self, ch: str, color_key=(0, 0, 255)) -> pygame.Surface | None:
-        """Retorna a superfície recortada de um caractere, ou None se não mapeado."""
+        """
+        Retorna a superfície recortada de um caractere.
+        :param ch: Caractere.
+        :param color_key: Chave de cor para transparência.
+        :return: Superfície do caractere ou None.
+        """
         if ch not in self._MAP:
             return None
         pos = self._MAP[ch]
@@ -131,7 +132,12 @@ class AvatarPixelFont:
         return self._cache[key]
 
     def render(self, text: str, scale: float = 1.0) -> pygame.Surface:
-        """Renderiza uma string usando os glifos da font sheet."""
+        """
+        Renderiza uma string usando os glifos da font sheet.
+        :param text: Texto a renderizar.
+        :param scale: Escala.
+        :return: Superfície renderizada.
+        """
         chars = [self.get_char(c) for c in text]
         chars = [c for c in chars if c is not None]
         if not chars:
@@ -151,6 +157,16 @@ class AvatarPixelFont:
 #  HELPERS DE DESENHO
 # ─────────────────────────────────────────────
 def draw_text(surf, text, font, color, x, y, align="left"):
+    """
+    Desenha texto na superfície.
+    :param surf: Superfície.
+    :param text: Texto.
+    :param font: Fonte.
+    :param color: Cor.
+    :param x: Posição x.
+    :param y: Posição y.
+    :param align: Alinhamento.
+    """
     img = font.render(str(text), True, color)
     if align == "center": x -= img.get_width() // 2
     elif align == "right": x -= img.get_width()
@@ -158,6 +174,16 @@ def draw_text(surf, text, font, color, x, y, align="left"):
 
 
 def draw_text_shadow(surf, text, font, color, x, y, align="left"):
+    """
+    Desenha texto com sombra.
+    :param surf: Superfície.
+    :param text: Texto.
+    :param font: Fonte.
+    :param color: Cor.
+    :param x: Posição x.
+    :param y: Posição y.
+    :param align: Alinhamento.
+    """
     shadow = font.render(str(text), True, (0, 0, 0))
     img    = font.render(str(text), True, color)
     if align == "center":
@@ -173,7 +199,15 @@ def blit_pixel_text(surf, px_font: AvatarPixelFont | None,
                     x, y, scale=1.0, align="left"):
     """
     Tenta usar a pixel-font do jogo; cai para font SDL se não disponível.
-    Só letras A-Z / a-z são suportadas pela pixel-font.
+    :param surf: Superfície.
+    :param px_font: Fonte pixel.
+    :param fallback_font: Fonte fallback.
+    :param text: Texto.
+    :param color: Cor.
+    :param x: Posição x.
+    :param y: Posição y.
+    :param scale: Escala.
+    :param align: Alinhamento.
     """
     if px_font is not None:
         img = px_font.render(text.upper(), scale)
@@ -192,6 +226,15 @@ def blit_pixel_text(surf, px_font: AvatarPixelFont | None,
 
 
 def draw_button(surf, rect, label, font, active=False, hover=False):
+    """
+    Desenha um botão.
+    :param surf: Superfície.
+    :param rect: Retângulo.
+    :param label: Rótulo.
+    :param font: Fonte.
+    :param active: Se ativo.
+    :param hover: Se hover.
+    """
     if active:
         bg, border = C_FIRE, C_GOLD
     elif hover:
@@ -214,7 +257,17 @@ def draw_button(surf, rect, label, font, active=False, hover=False):
 #  CLASSE PRINCIPAL
 # ─────────────────────────────────────────────
 class VisualizadorPygame:
+    """
+    Classe para visualizar a jornada usando Pygame.
+    """
+
     def __init__(self, mapa, caminho_calculado, log_jornada):
+        """
+        Inicializa o visualizador.
+        :param mapa: Objeto mapa.
+        :param caminho_calculado: Lista de caminho.
+        :param log_jornada: Lista de log da jornada.
+        """
         pygame.init()
         pygame.display.set_caption("Avatar Path · INF1771")
         self.screen = pygame.display.set_mode((1280, 720), pygame.RESIZABLE)
@@ -258,7 +311,7 @@ class VisualizadorPygame:
     def _load_assets(self):
         gui_dir    = os.path.dirname(__file__)
         assets_dir = os.path.join(gui_dir, "..", "assets")
-        sprites_dir= os.path.join(assets_dir, "sprites")
+        sprites_dir= os.path.join(assets_dir, "tiles")
 
         self.assets = {}
 
@@ -637,6 +690,9 @@ class VisualizadorPygame:
 
     # ── Loop ─────────────────────────────────
     def iniciar_loop(self):
+        """
+        Inicia o loop principal da interface gráfica.
+        """
         running = True
         while running:
             mx, my = pygame.mouse.get_pos()

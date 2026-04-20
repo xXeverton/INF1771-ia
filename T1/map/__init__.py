@@ -1,0 +1,1 @@
+# Este arquivo é o __init__.py do módulo map, que contém classes e constantes para o mapa do jogo.

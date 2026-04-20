@@ -1,5 +1,5 @@
 """
-Este arquivo guarda todas as configurações do jogo.
+Constantes do jogo: custos de terreno, dificuldades das etapas e configuração da equipe.
 """
 
 # Custos de cada tipo de terreno (em minutos)
@@ -23,8 +23,8 @@ DIFICULDADES = {
     'Y': 300, 'Z': 310                                                 
 }
 
-# Agilidade de cada personagem (influencia o tempo das etapas)
-EQUIPE_CONFIG = {
+# Configuração da equipe (energia e agilidade)
+CONFIG_EQUIPE = {
     "Aang":   {"energia": 8, "agilidade": 1.8},
     "Zukko":  {"energia": 8, "agilidade": 1.6},
     "Toph":   {"energia": 8, "agilidade": 1.6},

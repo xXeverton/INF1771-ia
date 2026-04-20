@@ -1,0 +1,1 @@
+# Este arquivo é o __init__.py do módulo gui, que contém componentes para a interface gráfica.

@@ -1,0 +1,1 @@
+# Este arquivo é o __init__.py do módulo entities, que contém classes para entidades do jogo, como agentes.

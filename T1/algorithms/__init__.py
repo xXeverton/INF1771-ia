@@ -1,0 +1,1 @@
+# Este arquivo é o __init__.py do módulo algorithms, que contém algoritmos de busca e alocação.
