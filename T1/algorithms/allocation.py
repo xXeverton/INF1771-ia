@@ -6,15 +6,15 @@ import random
 import time
 
 # Parâmetros do Algoritmo Genético
-AG_POPULACAO = 20
-AG_GERACOES = 200
-AG_ELITE = 3
-AG_TAXA_CROSSOVER = 0.85
-AG_TAXA_MUTACAO = 0.40
-AG_TAXA_MUTACAO_GENE = 0.35
-AG_K_TORNEIO = 3
-AG_SEED = 42
-AG_PARADA_ESTAGNACAO = 80
+AG_POPULACAO  = 20    # Número de indivíduos na população
+AG_GERACOES = 200   # Número máximo de gerações
+AG_ELITE = 3     # Quantos melhores sobrevivem intactos (elitismo)
+AG_TAXA_CROSS = 0.85  # Probabilidade de aplicar crossover (vs. cópia)
+AG_TAXA_MUT = 0.40  # Probabilidade de aplicar mutação no filho
+AG_TAXA_MUT_GENE = 0.35  # Probabilidade de mutar cada personagem na mutação
+AG_K_TORNEIO = 3     # Tamanho do torneio de seleção
+AG_SEED = 42    # Semente aleatória (garante reprodutibilidade)
+AG_PARADA_ESTAGNACAO = 60    # Para após N gerações sem melhoria
 
 
 def _cromossomo_para_alocacao(cromossomo, etapas_batalha):
