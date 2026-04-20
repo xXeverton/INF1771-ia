@@ -309,39 +309,7 @@ class VisualizadorPygame:
 
     # ── Carregamento de Assets ────────────────
     def _load_assets(self):
-        gui_dir    = os.path.dirname(__file__)
-        assets_dir = os.path.join(gui_dir, "..", "assets")
-        sprites_dir= os.path.join(assets_dir, "tiles")
-
         self.assets = {}
-
-        def load(key, path):
-            try:
-                self.assets[key] = pygame.image.load(path).convert_alpha()
-                print(f"✓ Asset carregado: {key}")
-            except Exception as e:
-                print(f"✗ Falha ao carregar '{key}': {e}")
-                self.assets[key] = None
-
-        # Sprite do Aang no mapa (Playable-Characters)
-        load("aang_sprite",
-             os.path.join(sprites_dir, "Playable-Characters-Avatar-Aang.png"))
-
-        # Momo — decorativo no header
-        load("momo",
-             os.path.join(assets_dir, "Momo.png"))
-
-        # Retratos do Aang — usados no card de status
-        load("aang_portrait",
-             os.path.join(assets_dir, "Miscellaneous-Portraits-of-Aang.png"))
-
-        # Introdução — background de montanha + logo Avatar
-        load("intro",
-             os.path.join(assets_dir, "Miscellaneous-Introduction.png"))
-
-        # Fonte pixel-art do jogo GBA
-        load("font_sheet",
-             os.path.join(assets_dir, "Miscellaneous-Font-and-Options.png"))
 
         # Inicializa a pixel-font se a sheet carregou
         if self.assets.get("font_sheet"):
