@@ -1,17 +1,5 @@
 # Este arquivo implementa a interface gráfica usando Pygame para visualizar o mapa e a jornada.
 
-"""
-Visualizador Pygame - Avatar: The Last Airbender Theme
-INF1771 · Layout em Cards com Assets Reais do Jogo GBA
-
-Assets utilizados (pasta assets/):
-  Miscellaneous-Font-and-Options.png   → Fonte pixel-art do jogo (letras A-Z, a-z)
-  Miscellaneous-Portraits-of-Aang.png  → Retrato do Aang no card de status (crop)
-  Miscellaneous-Introduction.png       → Background de montanha + logo Avatar no painel
-  sprites/Playable-Characters-Avatar-Aang.png → Sprite do Aang caminhando no mapa
-  Momo.png                             → Momo no header do painel
-"""
-
 import pygame
 import sys
 import os
@@ -74,83 +62,7 @@ TERRAIN_LEGEND = [
 ]
 
 
-# ─────────────────────────────────────────────
-#  PIXEL FONT  (extraída de Miscellaneous-Font-and-Options.png)
-# ─────────────────────────────────────────────
-class AvatarPixelFont:
-    """
-    Recorta as letras da sprite-sheet de fonte do jogo GBA.
-    """
 
-    # Ajuste estes valores conforme a imagem real:
-    TILE_W  = 14   # largura de cada caractere na sprite-sheet
-    TILE_H  = 14   # altura de cada caractere
-    COLS    =  9   # quantos chars por linha na sheet
-
-    # Mapeamento: char → (col, row) na grid da imagem
-    _MAP: dict[str, tuple[int, int]] = {}
-
-    def __init__(self, sheet: pygame.Surface):
-        """
-        Inicializa a fonte com a sprite-sheet.
-        :param sheet: Superfície da sprite-sheet.
-        """
-        self.sheet = sheet
-        self._build_map()
-        self._cache: dict[tuple, pygame.Surface] = {}
-
-    def _build_map(self):
-        """Constrói o mapeamento char → posição na grid."""
-        # Maiúsculas A-Z  (26 chars, dispostos em 3 linhas de 9)
-        for i, ch in enumerate("ABCDEFGHIJKLMNOPQRSTUVWXYZ"):
-            self._MAP[ch] = (i % self.COLS, i // self.COLS)
-
-        # Minúsculas a-z (linha 3 em diante na sheet)
-        row_offset = math.ceil(26 / self.COLS)   # linha onde as minúsculas começam
-        for i, ch in enumerate("abcdefghijklmnopqrstuvwxyz"):
-            self._MAP[ch] = (i % self.COLS, row_offset + i // self.COLS)
-
-    def get_char(self, ch: str, color_key=(0, 0, 255)) -> pygame.Surface | None:
-        """
-        Retorna a superfície recortada de um caractere.
-        :param ch: Caractere.
-        :param color_key: Chave de cor para transparência.
-        :return: Superfície do caractere ou None.
-        """
-        if ch not in self._MAP:
-            return None
-        pos = self._MAP[ch]
-        key = (ch, color_key)
-        if key not in self._cache:
-            x = pos[0] * self.TILE_W
-            y = pos[1] * self.TILE_H
-            surf = pygame.Surface((self.TILE_W, self.TILE_H), pygame.SRCALPHA)
-            surf.blit(self.sheet, (0, 0), (x, y, self.TILE_W, self.TILE_H))
-            # Remove fundo azul da sprite-sheet
-            surf.set_colorkey(color_key)
-            self._cache[key] = surf
-        return self._cache[key]
-
-    def render(self, text: str, scale: float = 1.0) -> pygame.Surface:
-        """
-        Renderiza uma string usando os glifos da font sheet.
-        :param text: Texto a renderizar.
-        :param scale: Escala.
-        :return: Superfície renderizada.
-        """
-        chars = [self.get_char(c) for c in text]
-        chars = [c for c in chars if c is not None]
-        if not chars:
-            return pygame.Surface((0, 0))
-
-        tw = int(self.TILE_W * scale)
-        th = int(self.TILE_H * scale)
-        total_w = tw * len(chars)
-        surf = pygame.Surface((total_w, th), pygame.SRCALPHA)
-        for i, ch_surf in enumerate(chars):
-            scaled = pygame.transform.scale(ch_surf, (tw, th)) if scale != 1.0 else ch_surf
-            surf.blit(scaled, (i * tw, 0))
-        return surf
 
 
 # ─────────────────────────────────────────────
@@ -194,35 +106,7 @@ def draw_text_shadow(surf, text, font, color, x, y, align="left"):
     surf.blit(img,    (x,     y))
 
 
-def blit_pixel_text(surf, px_font: AvatarPixelFont | None,
-                    fallback_font, text: str, color,
-                    x, y, scale=1.0, align="left"):
-    """
-    Tenta usar a pixel-font do jogo; cai para font SDL se não disponível.
-    :param surf: Superfície.
-    :param px_font: Fonte pixel.
-    :param fallback_font: Fonte fallback.
-    :param text: Texto.
-    :param color: Cor.
-    :param x: Posição x.
-    :param y: Posição y.
-    :param scale: Escala.
-    :param align: Alinhamento.
-    """
-    if px_font is not None:
-        img = px_font.render(text.upper(), scale)
-        if img.get_width() > 0:
-            # Coloriza: multiplica pixel-a-pixel pela cor desejada
-            colored = img.copy()
-            colored.fill((*color, 0), special_flags=pygame.BLEND_RGBA_MULT)
-            colored.fill((255, 255, 255, 0), special_flags=pygame.BLEND_RGBA_ADD)
-            # Simplificado: apenas blit com tint
-            img.fill((*color, 255), special_flags=pygame.BLEND_RGB_MULT)
-            if align == "center": x -= img.get_width() // 2
-            elif align == "right": x -= img.get_width()
-            surf.blit(img, (x, y))
-            return
-    draw_text_shadow(surf, text, fallback_font, color, x, y, align)
+
 
 
 def draw_button(surf, rect, label, font, active=False, hover=False):
@@ -283,8 +167,6 @@ class VisualizadorPygame:
         self.last_mouse  = (0, 0)
         self.anim_tick   = 0
 
-        self._load_assets()
-
         # Fontes SDL (fallback e para números/dados)
         self.f_title    = pygame.font.SysFont("Impact", 19)
         self.f_sub      = pygame.font.SysFont("Arial",  10)
@@ -306,50 +188,6 @@ class VisualizadorPygame:
         pygame.time.set_timer(pygame.USEREVENT + 1, STEP_MS)
         self._update_layout()
         self._center_map()
-
-    # ── Carregamento de Assets ────────────────
-    def _load_assets(self):
-        self.assets = {}
-
-        # Inicializa a pixel-font se a sheet carregou
-        if self.assets.get("font_sheet"):
-            self.px_font = AvatarPixelFont(self.assets["font_sheet"])
-        else:
-            self.px_font = None
-
-        # ── Pré-processa o background de montanha ──
-        # Extrai o painel de fundo de montanha da intro (canto superior direito)
-        self.bg_mountain = None
-        intro = self.assets.get("intro")
-        if intro:
-            iw, ih = intro.get_size()
-            # O background de montanha ocupa aprox. a coluna direita da intro sheet
-            # (ajuste as coordenadas conforme o layout real)
-            crop_rect = pygame.Rect(int(iw * 0.72), 0, int(iw * 0.28), ih // 2)
-            self.bg_mountain = pygame.Surface((crop_rect.w, crop_rect.h), pygame.SRCALPHA)
-            self.bg_mountain.blit(intro, (0, 0), crop_rect)
-
-        # ── Logo "Avatar: The Last Airbender" ──
-        # Extrai o logo da tela de título (linha 2, col 2 da intro sheet)
-        self.logo_avatar = None
-        if intro:
-            iw, ih = intro.get_size()
-            # Linha 2 = rows 1/3 a 2/3 da height; coluna central
-            logo_rect = pygame.Rect(int(iw * 0.34), int(ih * 0.34),
-                                    int(iw * 0.35), int(ih * 0.16))
-            self.logo_avatar = pygame.Surface((logo_rect.w, logo_rect.h), pygame.SRCALPHA)
-            self.logo_avatar.blit(intro, (0, 0), logo_rect)
-
-        # ── Retrato do Aang (primeiro da sheet de portraits) ──
-        self.portrait_aang = None
-        portrait_sheet = self.assets.get("aang_portrait")
-        if portrait_sheet:
-            pw, ph = portrait_sheet.get_size()
-            # Primeiro retrato: canto superior esquerdo, approx 1/4 da largura
-            port_rect = pygame.Rect(0, 0, pw // 4, ph // 6)
-            self.portrait_aang = pygame.Surface((port_rect.w, port_rect.h), pygame.SRCALPHA)
-            self.portrait_aang.blit(portrait_sheet, (0, 0), port_rect)
-            self.portrait_aang.set_colorkey((0, 0, 255))  # remove fundo azul
 
     # ── Layout ───────────────────────────────
     def _update_layout(self):
@@ -413,14 +251,6 @@ class VisualizadorPygame:
         self.screen.set_clip(clip)
         self.screen.fill(BG)
 
-        # Background de montanha (intro) no canto superior esquerdo do mapa
-        if self.bg_mountain:
-            bw = min(self.MAP_W, self.bg_mountain.get_width())
-            bh = min(self.MAP_H // 3, self.bg_mountain.get_height())
-            scaled_bg = pygame.transform.smoothscale(self.bg_mountain, (bw, bh))
-            scaled_bg.set_alpha(40)  # bem transparente, só ambienta
-            self.screen.blit(scaled_bg, (0, 0))
-
         self.screen.blit(self.map_surf, (-self.cam_x, -self.cam_y))
 
         if self.caminho:
@@ -435,36 +265,18 @@ class VisualizadorPygame:
                      ty * self.TILE - self.cam_y + 1,
                      self.TILE - 2, self.TILE - 2))
 
-            # Agente Aang
+            # Agente
             ax, ay = self.caminho[min(self.passo, len(self.caminho) - 1)]
             cx = ax * self.TILE + self.TILE // 2 - self.cam_x
             cy = ay * self.TILE + self.TILE // 2 - self.cam_y
 
-            # Aura de ar pulsante
+            # Aura pulsante
             pulse = abs(math.sin(self.anim_tick * 0.07)) * 5
             pygame.draw.circle(self.screen, C_AIR_DIM,
                                (cx, cy), int(self.TILE * 0.95 + pulse), 1)
             pygame.draw.circle(self.screen, C_AIR,
                                (cx, cy), int(self.TILE * 0.65 + pulse * 0.5), 1)
-
-            aang_sprite = self.assets.get("aang_sprite")
-            if aang_sprite:
-                # Usa a primeira pose de caminhada (canto superior esquerdo da sheet)
-                # A sheet tem múltiplos frames — pega o primeiro (aprox 24x32 px)
-                sw, sh = aang_sprite.get_size()
-                frame_w = sw // 8   # estimativa de colunas na sheet
-                frame_h = sh // 12  # estimativa de linhas
-                frame_rect = pygame.Rect(0, 0, frame_w, frame_h)
-
-                frame_surf = pygame.Surface((frame_w, frame_h), pygame.SRCALPHA)
-                frame_surf.blit(aang_sprite, (0, 0), frame_rect)
-                frame_surf.set_colorkey((255, 255, 255))  # fundo branco
-
-                tamanho = max(self.TILE * 2, 24)
-                scaled  = pygame.transform.smoothscale(frame_surf, (tamanho, tamanho))
-                self.screen.blit(scaled, scaled.get_rect(center=(cx, cy)))
-            else:
-                pygame.draw.circle(self.screen, C_GOLD, (cx, cy), max(3, self.TILE // 2))
+            pygame.draw.circle(self.screen, C_GOLD, (cx, cy), max(3, self.TILE // 2))
 
         # Borda divisória lateral
         pygame.draw.line(self.screen, C_FIRE_DIM, (self.MAP_W - 2, 0), (self.MAP_W - 2, self.MAP_H), 2)
@@ -482,9 +294,8 @@ class VisualizadorPygame:
                              (x, y, w, 26),
                              border_top_left_radius=5, border_top_right_radius=5)
             pygame.draw.line(self.screen, CARD_BORDER, (x + 6, y + 26), (x + w - 6, y + 26), 1)
-            # Usa pixel-font para o título se disponível
-            blit_pixel_text(self.screen, self.px_font, self.f_card_h,
-                            title, title_color, x + 12, y + 7)
+            draw_text_shadow(self.screen, title, self.f_card_h,
+                            title_color, x + 12, y + 7)
 
     # ── Painel ───────────────────────────────
     def _draw_panel(self, mx, my):
@@ -502,45 +313,17 @@ class VisualizadorPygame:
         # Linha de brilho dourado topo
         pygame.draw.rect(self.screen, C_GOLD, (cx + 2, py + 1, cw - 4, 2), border_radius=4)
 
-        # Logo Avatar (cropped da intro sheet) — ocupa a parte esquerda/central
-        logo = self.logo_avatar
-        if logo:
-            lw = min(cw - 60, 200)
-            lh = int(logo.get_height() * (lw / logo.get_width()))
-            lh = min(lh, hh - 10)
-            scaled_logo = pygame.transform.smoothscale(logo, (lw, lh))
-            scaled_logo.set_colorkey((0, 128, 0))  # remove fundo verde da sheet
-            self.screen.blit(scaled_logo, (cx + 8, py + (hh - lh) // 2))
-        else:
-            # Fallback: texto com pixel-font
-            blit_pixel_text(self.screen, self.px_font, self.f_title,
-                            "AVATAR PATH", C_FIRE, cx + 10, py + 12, scale=1.1)
-            draw_text(self.screen, "INF1771 · Busca de Caminhos",
-                      self.f_sub, C_AIR_DIM, cx + 10, py + 48)
-
-        # Momo no canto direito do header
-        momo = self.assets.get("momo")
-        if momo:
-            mh = hh - 8
-            mw = int(momo.get_width() * (mh / momo.get_height()))
-            scaled_momo = pygame.transform.smoothscale(momo, (mw, mh))
-            self.screen.blit(scaled_momo, (cx + cw - mw - 4, py + 4))
+        # Texto do header
+        draw_text_shadow(self.screen, "AVATAR PATH", self.f_title,
+                        C_FIRE, cx + 10, py + 12)
+        draw_text(self.screen, "INF1771 · Busca de Caminhos",
+                  self.f_sub, C_AIR_DIM, cx + 10, py + 48)
 
         py += hh + 7
 
         # ── CARD 1: Status + Retrato do Aang ─
         hc1 = 66
         self._draw_card(cx, py, cw, hc1, "ESTADO DA MISSAO")
-
-        # Retrato do Aang no card de status
-        portrait = self.portrait_aang
-        portrait_w = 0
-        if portrait:
-            ph_scaled = hc1 - 14
-            pw_scaled = int(portrait.get_width() * (ph_scaled / portrait.get_height()))
-            scaled_p  = pygame.transform.smoothscale(portrait, (pw_scaled, ph_scaled))
-            self.screen.blit(scaled_p, (cx + cw - pw_scaled - 8, py + 7))
-            portrait_w = pw_scaled + 12
 
         # Texto de status
         if self.concluido:
@@ -550,8 +333,7 @@ class VisualizadorPygame:
         else:
             status_txt, cor = "Em Pausa", C_GRAY
 
-        blit_pixel_text(self.screen, self.px_font, self.f_stat_v,
-                        status_txt, cor, cx + 12, py + 30, scale=0.95)
+        draw_text(self.screen, status_txt, self.f_stat_v, cor, cx + 12, py + 30)
 
         idx = -1
         if self.trechos and self.caminho:
@@ -575,7 +357,7 @@ class VisualizadorPygame:
             pygame.draw.rect(self.screen, (10, 14, 22), (bx, by, sw, 48), border_radius=4)
             pygame.draw.rect(self.screen, (38, 48, 65), (bx, by, sw, 48), 1, border_radius=4)
             draw_text(self.screen, lbl, self.f_stat_l, C_GRAY, bx + sw // 2, by + 6, "center")
-            draw_text(self.screen, val, self.f_stat_v, col,    bx + sw // 2, by + 22, "center")
+            draw_text_shadow(self.screen, val, self.f_stat_v, col,    bx + sw // 2, by + 22, "center")
         py += hc2 + 6
 
         # ── CARD 3: Controles ────────────────

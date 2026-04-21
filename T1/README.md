@@ -1,8 +1,7 @@
-meu_projeto/
+
+```
+T1/
 │
-├── assets/              # imagens .png aqui
-│   ├── tiles/           # Imagens de grama, montanha, água, etc.
-│   └── sprites/         # Imagens dos personagens (Aang, Katara...)
 │
 ├── gui/                 # Tudo relacionado ao Pygame
 │   ├── __init__.py
@@ -25,4 +24,5 @@ meu_projeto/
 ├── data/
 │   └── mapa.txt         
 │
-└── main.py              
+└── main.py        
+```
