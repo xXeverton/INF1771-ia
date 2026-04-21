@@ -2,7 +2,6 @@
 ```
 T1/
 │
-│
 ├── gui/                 # Tudo relacionado ao Pygame
 │   ├── __init__.py
 │   └── renderer.py      # Classe responsável por abrir a janela e desenhar
@@ -15,7 +14,7 @@ T1/
 ├── algorithms/          # Puramente matemática e IA
 │   ├── __init__.py
 │   ├── astar.py         # Busca do Caminho e Heurística (Problema 1)
-│   └── allocation.py    # Busca Gulosa de Benefício Marginal (Problema 2)
+│   └── allocation.py    # Algoritmo Genético + Busca Local (Hill Climbing)
 │
 ├── entities/            # Os "atores" do nosso sistema
 │   ├── __init__.py
